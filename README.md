@@ -41,15 +41,6 @@ Matplotlib: Used for visualizing the review counts and sentiment scores.
 - The results show the number of reviews, average sentiment scores, and the platform with the best sentiment.
 - A bar chart visualizing the review counts and sentiment scores is generated and displayed on the webpage.
 
-  
-## Example Screenshots
-
-**Input Page:**
-
-
-
-**Sentiment Analysis Results:**
-
 
 ## Future Improvements
 

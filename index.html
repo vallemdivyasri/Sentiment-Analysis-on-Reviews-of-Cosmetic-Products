@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Comparison</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='img.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: auto;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            max-width: 800px;
+            padding-top: 150px; /* Increased padding for title visibility */
+        }
+
+        .form-group {
+            text-align: center;
+        }
+
+        .form-control {
+            border: 2px solid #ff4081;
+            border-radius: 15px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn {
+            margin: 20px;
+            padding: 10px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .spinner-border {
+            display: none;
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.4rem;
+            color: #ff4081;
+            margin-top: 20px;
+        }
+
+        #results {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 20px;
+            color: #000;
+        }
+
+        .table-wrapper {
+            max-height: 60vh;
+            overflow-y: auto;
+            width: 130%;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9); /* Table background contrast */
+        }
+
+        th, td {
+            padding: 15px;
+            border: 2px solid #333; /* Darker table borders */
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #000;
+            text-align: center;
+            margin-top: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Sentiment Analysis on Reviews of Cosmetic Products</h1>
+        <form id="reviewForm">
+            <div class="form-group">
+                <label for="tiraUrl">TIRA Product URL:</label>
+                <input type="text" class="form-control" id="tiraUrl" name="tira_url" placeholder="Enter TIRA product URL">
+            </div>
+            <div class="form-group">
+                <label for="amazonUrl">Amazon Product URL:</label>
+                <input type="text" class="form-control" id="amazonUrl" name="amazon_url" placeholder="Enter Amazon product URL">
+            </div>
+            <div class="form-group">
+                <label for="smyttenUrl">Smytten Product URL:</label>
+                <input type="text" class="form-control" id="smyttenUrl" name="smytten_url" placeholder="Enter Smytten product URL">
+            </div>
+
+            <button type="button" class="btn btn-primary" id="compareBtn">Compare</button>
+            <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+        </form>
+
+        <!-- Loading spinner -->
+        <div class="spinner-border text-primary" role="status" id="loadingSpinner">
+            <span class="sr-only">Loading...</span>
+        </div>
+
+        <div class="table-wrapper" id="resultsTable"></div>
+    </div>
+
+    <script>
+        // Handle the comparison button click
+        document.getElementById('compareBtn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('reviewForm'));
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultsDiv = document.getElementById('resultsTable');
+
+            // Check if URLs are provided before proceeding
+            const tiraUrl = document.getElementById('tiraUrl').value.trim();
+            const amazonUrl = document.getElementById('amazonUrl').value.trim();
+            const smyttenUrl = document.getElementById('smyttenUrl').value.trim();
+
+            if (!tiraUrl || !amazonUrl || !smyttenUrl) {
+                alert('Please enter all URLs before comparing.');
+                return;
+            }
+
+            // Show the loading spinner and clear the result text
+            loadingSpinner.style.display = 'block';
+            resultsDiv.innerHTML = '';
+
+            // Fetch the comparison result
+            fetch('/compare', {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide the loading spinner
+                loadingSpinner.style.display = 'none';
+
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // Display the best platform and scores for each platform
+                    const tableHTML = `
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Platform Name</th>
+                                <th>Product Name</th>
+                                <th>Reviews Count</th>
+                                <th>Sentiment Score</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>TIRA</td>
+                                <td>${data.tira_product_name}</td>
+                                <td>${data.tira_reviews_count}</td>
+                                <td>${data.tira_average_score.toFixed(3)}</td>
+                            </tr>
+                            <tr>
+                                <td>Amazon</td>
+                                <td>${data.amazon_product_name}</td>
+                                <td>${data.amazon_reviews_count}</td>
+                                <td>${data.amazon_average_score.toFixed(3)}</td>
+                            </tr>
+                            <tr>
+                                <td>Smytten</td>
+                                <td>${data.smytten_product_name}</td>
+                                <td>${data.smytten_reviews_count}</td>
+                                <td>${data.smytten_average_score.toFixed(3)}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="font-weight: bold; font-size: 30px; text-align: center;">Best Platform to buy is ${data.best_platform}</td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+                resultsDiv.innerHTML = tableHTML;
+            }
+            })
+            .catch(error => {
+                loadingSpinner.style.display = 'none';
+                resultsDiv.innerHTML = 'An error occurred while fetching the data. Please try again later.';
+                console.error('Error:', error);
+            });
+        });
+
+        // Handle the clear button click
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('tiraUrl').value = '';
+            document.getElementById('amazonUrl').value = '';
+            document.getElementById('smyttenUrl').value = '';
+            document.getElementById('resultsTable').innerHTML = '';
+            document.getElementById('loadingSpinner').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

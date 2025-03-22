@@ -1,5 +1,4 @@
-Output:
-![Screenshot 2025-03-22 171523](https://github.com/user-attachments/assets/ad8b34b9-f211-4bbf-a7de-d349c7a55f31)
+
 # Sentiment-Analysis-on-Reviews-of-Cosmetic-Products
 
 
@@ -43,6 +42,9 @@ Matplotlib: Used for visualizing the review counts and sentiment scores.
 - The results show the number of reviews, average sentiment scores, and the platform with the best sentiment.
 - A bar chart visualizing the review counts and sentiment scores is generated and displayed on the webpage.
 
+**Output:(After Clicking Compare)**
+
+![Screenshot 2025-03-22 171523](https://github.com/user-attachments/assets/ad8b34b9-f211-4bbf-a7de-d349c7a55f31)
 
 ## Future Improvements
 

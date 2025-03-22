@@ -1,3 +1,5 @@
+Output:
+![Screenshot 2025-03-22 171523](https://github.com/user-attachments/assets/ad8b34b9-f211-4bbf-a7de-d349c7a55f31)
 # Sentiment-Analysis-on-Reviews-of-Cosmetic-Products
 
 
